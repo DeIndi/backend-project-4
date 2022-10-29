@@ -11,6 +11,7 @@ cli.version('1.001');
 cli.option('-o, --output <dir>', 'output directory');
 cli.arguments('<url>');
 cli.action((link, options) => {
-  pageLoad(link, options.dir);
+	console.log('options: ', options);
+  pageLoad(link, options.output);
 });
 cli.parse(process.argv);
