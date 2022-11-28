@@ -15,6 +15,25 @@ const slugify = (address) => (
 
 const fileExists = path => stat(path).then(() => true, () => false);
 
+const testFunc = (address) => {
+    address
+        .replace(/\W+/g, '-')
+        .replace(/-$/, '')
+        .replace(/^-/, '')
+        .replace(/\W+/g, '-')
+        .replace(/-$/, '')
+        .replace(/^-/, '')
+}
+const testFunc2 = (address) => {
+    address
+        .replace(/\W+/g, '-')
+        .replace(/-$/, '')
+        .replace(/^-/, '')
+        .replace(/\W+/g, '-')
+        .replace(/-$/, '')
+        .replace(/^-/, '')
+}
+
 const urlToFileName = (url, defaultExt = '.html') => {
     const {hostname, pathname} = new URL(url);
     const {dir, name, ext } = (pathname && pathname!=='/')?parse(`${hostname}${pathname}`):parse(`${hostname}${defaultExt}`);
