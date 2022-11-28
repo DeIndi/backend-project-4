@@ -12,6 +12,13 @@ cli.option('-o, --output <dir>', 'output directory');
 cli.arguments('<url>');
 cli.action((link, options) => {
 	console.log('options: ', options);
-  pageLoad(link, options.output);
+    pageLoad(link, options.output).then( () => {
+        console.log("Page loaded!");
+    }).catch((error) => {
+        console.error("Error messge:", error.message);
+        process.exit(1);
+    })
+
 });
 cli.parse(process.argv);
+//catch exception  ( No exceptions in page loader.js)
