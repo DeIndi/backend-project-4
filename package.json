@@ -2,7 +2,7 @@
   "name": "@hexlet/code",
   "version": "1.0.0",
   "description": "[![Actions Status](https://github.com/DeIndi/backend-project-4/workflows/hexlet-check/badge.svg)](https://github.com/DeIndi/backend-project-4/actions)",
-  "main": "src/index.js",
+  "main": "src/page-loader.js",
   "type": "module",
   "scripts": {
     "test": "jest"
