@@ -93,13 +93,13 @@ const pageLoad = (url, dir = '.') => {
     htmlText = resp.data;
     return resp;
   }).then((resp) => mkdir(filesDirPath, { recursive: true }).then(() => resp)).then((resp) => {
-    const { assets } = parseHTML(filesDirPath, htmlText, url);
+    const { assets, htmlParsed } = parseHTML(filesDirPath, htmlText, url);
+    htmlText = htmlParsed;
     downloadResources(assets, filesDirPath);
     return resp;
-  })
-    .then(() => {
-      writeFile(htmlPath, htmlText);
-    });
+  }).then(() => {
+    writeFile(htmlPath, htmlText);
+  });
 };
 
 export default pageLoad;
