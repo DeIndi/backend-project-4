@@ -23,6 +23,5 @@ cd backend-project-4
 make install
 make link
 ```
-## Demos
-
-### Hexlet tests and linter status:
+## Demo
+[![asciicast](https://asciinema.org/a/wxt5KTKrOupSqkwgcKJJ12kRf.svg)](https://asciinema.org/a/wxt5KTKrOupSqkwgcKJJ12kRf)
