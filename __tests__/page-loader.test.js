@@ -21,9 +21,6 @@ test('main test', async () => {
   const expectedImgs = [
     await readFileContent('./expected/ru-hexlet-io-courses_files/ru-hexlet-io-assets-professions-nodejs.png'),
   ];
-  // for several - await Promise.all
-
-  // abstraction with data
 
   const scope = nock(' https://ru.hexlet.io')
 	  .persist()
@@ -37,10 +34,6 @@ test('main test', async () => {
 	  // const outputDir = "test2";
 	  console.log('OUTPUT DIR: ', outputDir);
 	  await pageLoad('https://ru.hexlet.io/courses', outputDir);
-	  // const resultHTML = await readFile(`${outputDir}/www-columbia-edu-~fdc.html`);
-	  // const resultImg = await readFile(`${outputDir}/_files/www.columbia.edu/~fdc/fdc2.jpg`);
-  // expect(resultHTML).toEqual(expectedHTML);
-  // expect(resultImg).toEqual(expectedImgs[0]);
 });
 
 test('404 / page not found test', async () => {

@@ -12,9 +12,9 @@ const slugify = (address) => (
     .replace(/^-/, '')
 );
 
-const urlToFileName = (url, defaultExt = '.html') => {
-  const { hostname, pathname } = new URL(url);
-  const { dir, name, ext } = (pathname && pathname !== '/') ? parse(`${hostname}${pathname}`) : parse(`${hostname}${defaultExt}`);
+const urlToFileName = (hostAndPath, defaultExt = '.html') => {
+  console.log('hostAndPath: ', hostAndPath);
+  const { dir, name, ext } = parse(hostAndPath.replace(/\/$/, defaultExt));
   const slug = slugify(`${dir}/${name}`);
   return `${slug}${ext || defaultExt}`;
 };
@@ -27,14 +27,12 @@ const urlToDirName = (url) => {
 };
 
 const assetSrcToAssetPath = (assetSrc, baseURL) => {
+  // url address to local file system address
   if (!assetSrc) {
     return null;
   }
-  if (assetSrc.startsWith('http:')) {
-    return assetSrc;
-  }
-  const tempLink = new URL(assetSrc, new URL(baseURL));
-  return `${tempLink.host}${tempLink.pathname}`;
+  const tempLink = new URL(assetSrc, baseURL);
+  return urlToFileName(`${tempLink.host}${tempLink.pathname}`);
 };
 
 const assetTags = { img: 'src', link: 'href', script: 'src' };
@@ -45,18 +43,28 @@ const parseHTML = (filesDirPath, htmlText, url) => {
   const assets = [];
   tagsAttrsPairs.forEach(([tagName, attrName]) => {
     $(`${tagName}`).each(async (idx, elem) => {
+      // Это href <link href="http://yandex.ru/some.html" />
+      // elemHref -- это строка "http://yandex.ru/some.html"
       const elemHref = $(elem).attr(`${attrName}`);
       if (!elemHref) {
         return;
       }
+      // url -- это URL страницы на которой asset
+      if (new URL(elemHref, url).origin !== new URL(url).origin) {
+        return;
+      }
+      // assetPath -- адрес файла в файловой системе
       const assetPath = assetSrcToAssetPath(elemHref, url);
-      const filePath = `${filesDirPath}/${assetPath}`.replace('//', '/');
+      // filePath -- тоже (тот же) адрес в файловой системе, из которого вычистили двойные слэши
+      const filePath = `${assetPath}`.replace('//', '/');
       $(elem).attr(`${attrName}`, filePath);
-      const assetUrl = new URL(elemHref, url);
-      assets.push({ filePath, assetUrl: assetUrl.href });
+      // filepath - in file system
+      // assetUrl - url
+      assets.push({ filePath, assetUrl: elemHref }); // Чему равен assetUrl ?
     });
   });
   const htmlParsed = $.html();
+  console.log('assets from ParseHTML: ', assets);
   return { assets, htmlParsed };
 };
 
@@ -70,6 +78,7 @@ const downloadAsset = async ({ filePath, assetUrl }, filesDirPath) => {
 };
 
 const downloadResources = async (assets, filesDirPath) => {
+  console.log('assets: ', assets);
   const tasks = assets.map(({ filePath, assetUrl }) => ({
     title: assetUrl,
     task: () => downloadAsset({ filePath, assetUrl }, filesDirPath),
@@ -83,23 +92,24 @@ const downloadResources = async (assets, filesDirPath) => {
 const pageLoad = (url, dir = '.') => {
   let htmlPath = '';
   let htmlText = '';
-  let filesDirPath = urlToDirName(url);
+  const filesDirPath = urlToDirName(url);
+  const fullPath = `${dir}/${filesDirPath}`;
   return axios.get(url).then((resp) => {
-    htmlPath = urlToFileName(url);
-    if (dir !== '.') {
-      htmlPath = `${dir}/${htmlPath}`;
-      filesDirPath = `${dir}/${filesDirPath}`;
-    }
+    const tempLink = new URL(url);
+    htmlPath = urlToFileName(`${tempLink.host}${tempLink.pathname}`);
     htmlText = resp.data;
     return resp;
   }).then((resp) => mkdir(filesDirPath, { recursive: true }).then(() => resp)).then((resp) => {
     const { assets, htmlParsed } = parseHTML(filesDirPath, htmlText, url);
+    // without dir
     htmlText = htmlParsed;
-    downloadResources(assets, filesDirPath);
+    downloadResources(assets, fullPath);
+    // with dir
     return resp;
-  }).then(() => {
-    writeFile(htmlPath, htmlText);
-  });
+  })
+    .then(() => {
+      writeFile(htmlPath, htmlText);
+    });
 };
 
 export default pageLoad;
