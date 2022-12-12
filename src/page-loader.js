@@ -83,7 +83,7 @@ const downloadResources = (assets, filesDirPath) => {
     task: () => downloadAsset({ filePath, assetUrl }, filesDirPath),
   }));
   const listr = new Listr(tasks);
-  return listr.run().catch((err) => {
+  return listr.run().catch(() => {
   });
 };
 
@@ -92,19 +92,21 @@ const pageLoad = (url, dir = '.') => {
   let htmlText = '';
   const filesDirPath = urlToDirName(url);
   const fullPath = `${dir}/${filesDirPath}`;
-  return axios.get(url).then((resp) => {
-    const tempLink = new URL(url);
-    htmlPath = urlToFileName(`${tempLink.host}${tempLink.pathname}`);
-    htmlText = resp.data;
-    return resp;
-  }).then((resp) => mkdir(filesDirPath, { recursive: true }).then(() => resp)).then((resp) => {
-    const { assets, htmlParsed } = parseHTML(filesDirPath, htmlText, url);
-    // without dir
-    htmlText = htmlParsed;
-    downloadResources(assets, fullPath);
-    // with dir
-    return resp;
-  })
+  return axios.get(url)
+    .then((resp) => {
+      const tempLink = new URL(url);
+      htmlPath = urlToFileName(`${tempLink.host}${tempLink.pathname}`);
+      htmlText = resp.data;
+      return resp;
+    })
+    .then(() => mkdir(filesDirPath, { recursive: true }))
+    .then(() => {
+      const { assets, htmlParsed } = parseHTML(filesDirPath, htmlText, url);
+      // without dir
+      htmlText = htmlParsed;
+      downloadResources(assets, fullPath);
+      // with dir
+    })
     .then(() => {
       writeFile(htmlPath, htmlText);
     });

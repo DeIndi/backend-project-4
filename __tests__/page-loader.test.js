@@ -10,7 +10,7 @@ const __dirname = dirname(__filename);
 
 const getFixturePath = (fileName) => join(__dirname, '..', '__fixtures__', fileName);
 
-const readFileContent = async (fileName) => await readFile(getFixturePath(fileName));
+const readFileContent = (fileName) => readFile(getFixturePath(fileName));
 
 nock.disableNetConnect();
 
@@ -23,17 +23,17 @@ test('main test', async () => {
   ];
 
   const scope = nock(' https://ru.hexlet.io')
-	  .persist()
-	  .get('/courses')
-	  .reply(200, expectedHTML)
-	  .get('/assets/professions/nodejs.png')
+    .persist()
+    .get('/courses')
+    .reply(200, expectedHTML)
+    .get('/assets/professions/nodejs.png')
     .reply(200, expectedHTML);
-	  const expected = [];
-	  expected.push(expectedHTML);
-	  const outputDir = await mkdtemp(`${os.tmpdir()}/page-loader-test`);
-	  // const outputDir = "test2";
-	  console.log('OUTPUT DIR: ', outputDir);
-	  await pageLoad('https://ru.hexlet.io/courses', outputDir);
+  const expected = [];
+  expected.push(expectedHTML);
+  const outputDir = await mkdtemp(`${os.tmpdir()}/page-loader-test`);
+  // const outputDir = "test2";
+  console.log('OUTPUT DIR: ', outputDir);
+  await pageLoad('https://ru.hexlet.io/courses', outputDir);
 });
 
 test('404 / page not found test', async () => {
@@ -67,4 +67,13 @@ test('503 / service unavailable test', async () => {
     .get('/')
     .reply(503, 'Service unavailable');
   await expect(pageLoad('https://testpage.testdomain')).rejects.toThrow();
+});
+// move nock before all tests
+
+test.only('load page: file system errors', async () => {
+  const pageUrl = 'http://localhost/';
+  const rootDirPath = '/sys';
+  await expect(
+    pageLoad(pageUrl.toString(), rootDirPath),
+  ).rejects.toThrow();
 });
