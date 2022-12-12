@@ -42,7 +42,7 @@ const parseHTML = (filesDirPath, htmlText, url) => {
   const $ = load(htmlText);
   const assets = [];
   tagsAttrsPairs.forEach(([tagName, attrName]) => {
-    $(`${tagName}`).each( (idx, elem) => {
+    $(`${tagName}`).each((idx, elem) => {
       // Это href <link href="http://yandex.ru/some.html" />
       // elemHref -- это строка "http://yandex.ru/some.html"
       const elemHref = $(elem).attr(`${attrName}`);
@@ -68,15 +68,13 @@ const parseHTML = (filesDirPath, htmlText, url) => {
   return { assets, htmlParsed };
 };
 
-const downloadAsset = ({ filePath, assetUrl }, filesDirPath) => {
-  return axios.get(`${assetUrl.toString()}`, {
-    responseType: 'arraybuffer',
-  }).then((result) => {
-    const fileChunks = filePath.split('/');
-    const fileName = fileChunks[fileChunks.length - 1];
-    return writeFile(`${filesDirPath}/${fileName}`, result.data);
-  });
-};
+const downloadAsset = ({ filePath, assetUrl }, filesDirPath) => axios.get(`${assetUrl.toString()}`, {
+  responseType: 'arraybuffer',
+}).then((result) => {
+  const fileChunks = filePath.split('/');
+  const fileName = fileChunks[fileChunks.length - 1];
+  return writeFile(`${filesDirPath}/${fileName}`, result.data);
+});
 
 const downloadResources = (assets, filesDirPath) => {
   console.log('assets: ', assets);
@@ -86,7 +84,6 @@ const downloadResources = (assets, filesDirPath) => {
   }));
   const listr = new Listr(tasks);
   return listr.run().catch((err) => {
-    console.error(err);
   });
 };
 
