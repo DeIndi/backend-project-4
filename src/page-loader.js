@@ -42,7 +42,7 @@ const parseHTML = (filesDirPath, htmlText, url) => {
   const $ = load(htmlText);
   const assets = [];
   tagsAttrsPairs.forEach(([tagName, attrName]) => {
-    $(`${tagName}`).each(async (idx, elem) => {
+    $(`${tagName}`).each( (idx, elem) => {
       // Это href <link href="http://yandex.ru/some.html" />
       // elemHref -- это строка "http://yandex.ru/some.html"
       const elemHref = $(elem).attr(`${attrName}`);
@@ -68,16 +68,17 @@ const parseHTML = (filesDirPath, htmlText, url) => {
   return { assets, htmlParsed };
 };
 
-const downloadAsset = async ({ filePath, assetUrl }, filesDirPath) => {
-  const result = await axios.get(`${assetUrl.toString()}`, {
+const downloadAsset = ({ filePath, assetUrl }, filesDirPath) => {
+  return axios.get(`${assetUrl.toString()}`, {
     responseType: 'arraybuffer',
+  }).then((result) => {
+    const fileChunks = filePath.split('/');
+    const fileName = fileChunks[fileChunks.length - 1];
+    return writeFile(`${filesDirPath}/${fileName}`, result.data);
   });
-  const fileChunks = filePath.split('/');
-  const fileName = fileChunks[fileChunks.length - 1];
-  return writeFile(`${filesDirPath}/${fileName}`, result.data);
 };
 
-const downloadResources = async (assets, filesDirPath) => {
+const downloadResources = (assets, filesDirPath) => {
   console.log('assets: ', assets);
   const tasks = assets.map(({ filePath, assetUrl }) => ({
     title: assetUrl,
