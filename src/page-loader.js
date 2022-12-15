@@ -1,4 +1,4 @@
-import { writeFile, mkdir } from 'node:fs/promises';
+import { writeFile, mkdir, access, constants } from 'node:fs/promises';
 import axios from 'axios';
 import { load } from 'cheerio';
 import { parse } from 'node:path';
@@ -92,6 +92,12 @@ const pageLoad = (url, dir = '.') => {
   let htmlText = '';
   const filesDirPath = urlToDirName(url);
   const fullPath = `${dir}/${filesDirPath}`;
+  //check if dir is accessible to write
+  if (!access('.', constants.W_OK)) {
+    throw 'No write access to dir!';
+    //console.log('No write access to dir!');
+  }
+
   return axios.get(url)
     .then((resp) => {
       const tempLink = new URL(url);
