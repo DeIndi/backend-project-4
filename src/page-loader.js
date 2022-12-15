@@ -1,4 +1,6 @@
-import { writeFile, mkdir, access, constants } from 'node:fs/promises';
+import {
+  writeFile, mkdir, access, constants,
+} from 'node:fs/promises';
 import axios from 'axios';
 import { load } from 'cheerio';
 import { parse } from 'node:path';
@@ -38,7 +40,7 @@ const assetSrcToAssetPath = (assetSrc, baseURL) => {
 const assetTags = { img: 'src', link: 'href', script: 'src' };
 const tagsAttrsPairs = _.toPairs(assetTags);
 
-const parseHTML = (filesDirPath, htmlText, url) => {
+const parseHTML = (filesDirPath, htmlText, baseUrl) => {
   const $ = load(htmlText);
   const assets = [];
   tagsAttrsPairs.forEach(([tagName, attrName]) => {
@@ -50,17 +52,17 @@ const parseHTML = (filesDirPath, htmlText, url) => {
         return;
       }
       // url -- это URL страницы на которой asset
-      if (new URL(elemHref, url).origin !== new URL(url).origin) {
+      if (new URL(elemHref, baseUrl).origin !== new URL(baseUrl).origin) {
         return;
       }
       // assetPath -- адрес файла в файловой системе
-      const assetPath = assetSrcToAssetPath(elemHref, url);
+      const assetPath = assetSrcToAssetPath(elemHref, baseUrl);
       // filePath -- тоже (тот же) адрес в файловой системе, из которого вычистили двойные слэши
       const filePath = `${assetPath}`.replace('//', '/');
       $(elem).attr(`${attrName}`, filePath);
       // filepath - in file system
       // assetUrl - url
-      assets.push({ filePath, assetUrl: elemHref }); // Чему равен assetUrl ?
+      assets.push({ filePath, assetUrl: new URL(elemHref, baseUrl).toString()}); // Чему равен assetUrl ?
     });
   });
   const htmlParsed = $.html();
@@ -91,13 +93,14 @@ const pageLoad = (url, dir = '.') => {
   let htmlPath = '';
   let htmlText = '';
   const filesDirPath = urlToDirName(url);
+  console.log('filesDirPath: ', filesDirPath);
   const fullPath = `${dir}/${filesDirPath}`;
-  //check if dir is accessible to write
-  if (!access('.', constants.W_OK)) {
-    throw 'No write access to dir!';
-    //console.log('No write access to dir!');
-  }
+  // check if dir is accessible to write
 
+  // console.log('constants W_OK: ', constants.W_OK);
+  // throw 'No write access to dir!';
+  // console.log('No write access to dir!');
+  // }
   return axios.get(url)
     .then((resp) => {
       const tempLink = new URL(url);
@@ -105,16 +108,16 @@ const pageLoad = (url, dir = '.') => {
       htmlText = resp.data;
       return resp;
     })
-    .then(() => mkdir(filesDirPath, { recursive: true }))
+    .then(() => mkdir(fullPath, { recursive: true }))
     .then(() => {
       const { assets, htmlParsed } = parseHTML(filesDirPath, htmlText, url);
       // without dir
       htmlText = htmlParsed;
-      downloadResources(assets, fullPath);
+      return downloadResources(assets, fullPath);
       // with dir
     })
     .then(() => {
-      writeFile(htmlPath, htmlText);
+      return writeFile(htmlPath, htmlText);
     });
 };
 

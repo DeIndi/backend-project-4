@@ -22,12 +22,9 @@ test('main test', async () => {
     await readFileContent('./expected/ru-hexlet-io-courses_files/ru-hexlet-io-assets-professions-nodejs.png'),
   ];
 
-  const scope = nock(' https://ru.hexlet.io')
-    .persist()
-    .get('/courses')
-    .reply(200, expectedHTML)
-    .get('/assets/professions/nodejs.png')
-    .reply(200, expectedHTML);
+  const scope = nock(' https://ru.hexlet.io').persist();
+  scope.get('/courses').reply(200, expectedHTML);
+  scope.get('/assets/professions/nodejs.png').reply(200, expectedHTML);
   const expected = [];
   expected.push(expectedHTML);
   const outputDir = await mkdtemp(`${os.tmpdir()}/page-loader-test`);
@@ -70,7 +67,7 @@ test('503 / service unavailable test', async () => {
 });
 // move nock before all tests
 
-test.only('load page: file system errors', async () => {
+test('load page: file system errors', async () => {
   const pageUrl = 'http://localhost/';
   const rootDirPath = '/sys';
   await expect(
