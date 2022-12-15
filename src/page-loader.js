@@ -58,7 +58,7 @@ const parseHTML = (filesDirPath, htmlText, baseUrl) => {
       // assetPath -- адрес файла в файловой системе
       const assetPath = assetSrcToAssetPath(elemHref, baseUrl);
       // filePath -- тоже (тот же) адрес в файловой системе, из которого вычистили двойные слэши
-      const filePath = `${assetPath}`.replace('//', '/');
+      const filePath = `${filesDirPath}/${assetPath}`.replace('//', '/');
       $(elem).attr(`${attrName}`, filePath);
       // filepath - in file system
       // assetUrl - url
