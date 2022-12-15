@@ -117,7 +117,8 @@ const pageLoad = (url, dir = '.') => {
       // with dir
     })
     .then(() => {
-      return writeFile(htmlPath, htmlText);
+      console.log('html file path ', `${dir}/${htmlPath}`);
+      return writeFile(`${dir}/${htmlPath}`, htmlText);
     });
 };
 
