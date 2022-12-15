@@ -1,5 +1,5 @@
 import {
-  writeFile, mkdir, access, constants,
+  writeFile, mkdir,
 } from 'node:fs/promises';
 import axios from 'axios';
 import { load } from 'cheerio';
