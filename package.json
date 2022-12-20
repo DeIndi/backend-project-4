@@ -37,7 +37,9 @@
     "url": "^0.11.0"
   },
   "devDependencies": {
+    "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-fp": "^2.3.0",
-    "eslint-plugin-jest": "^27.0.4"
+    "eslint-plugin-jest": "^27.0.4",
+    "prettier": "2.8.1"
   }
 }

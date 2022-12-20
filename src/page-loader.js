@@ -62,7 +62,7 @@ const parseHTML = (filesDirPath, htmlText, baseUrl) => {
       $(elem).attr(`${attrName}`, filePath);
       // filepath - in file system
       // assetUrl - url
-      assets.push({ filePath, assetUrl: new URL(elemHref, baseUrl).toString()}); // Чему равен assetUrl ?
+      assets.push({ filePath, assetUrl: new URL(elemHref, baseUrl).toString() });
     });
   });
   const htmlParsed = $.html();
