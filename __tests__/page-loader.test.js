@@ -18,6 +18,7 @@ nock.disableNetConnect();
 
 test('main test', async () => {
   const expectedHTML = await readFixtureFileContent('./expected/ru-hexlet-io-courses.html');
+  const expectedPNG = await readFixtureFileContent('./expected/ru-hexlet-io-courses_files/ru-hexlet-io-assets-professions-nodejs.png');
   const htmlToDownload = await readFixtureFileContent('./ru-hexlet-io-courses.html');
   /* const expectedImgs = [
     // eslint-disable-next-line max-len
@@ -28,7 +29,7 @@ test('main test', async () => {
 
   const scope = nock(' https://ru.hexlet.io').persist();
   scope.get('/courses').reply(200, htmlToDownload);
-  scope.get('/assets/professions/nodejs.png').reply(200, expectedHTML);
+  scope.get('/assets/professions/nodejs.png').reply(200, expectedPNG);
   const expected = [];
   expected.push(expectedHTML);
   const outputDir = await mkdtemp(`${os.tmpdir()}/page-loader-test`);
@@ -37,10 +38,12 @@ test('main test', async () => {
   await pageLoad('https://ru.hexlet.io/courses', outputDir);
   console.log('OUTPUT DIR after pageLoad: ', outputDir);
   const actualHTML = await readFile(`${outputDir}/ru-hexlet-io-courses.html`, 'utf8');
+  const actualPNG = await readFile(`${outputDir}/ru-hexlet-io-courses_files/ru-hexlet-io-assets-professions-nodejs.png`, 'utf8');
   console.log('OUTPUT DIR AFTER readFileContent: ', outputDir);
   console.log('actualHTML: ', actualHTML);
   console.log('expectedHTML: ', expectedHTML);
   await expect(actualHTML).toEqual(expectedHTML);
+  await expect(actualPNG).toEqual(expectedPNG);
 });
 
 test('404 / page not found test', async () => {
