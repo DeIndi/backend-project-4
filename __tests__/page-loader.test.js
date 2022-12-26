@@ -51,10 +51,10 @@ test('404 / page not found test', async () => {
   await expect(pageLoad('https://ru.hexlet.io/test404')).rejects.toThrow('404');
 });
 
-test('443 / unauthorized test', async () => {
+test('401 / unauthorized test', async () => {
   scope.get('/test401')
-    .reply(443, 'Unauthorized');
-  await expect(pageLoad('https://ru.hexlet.io/test401')).rejects.toThrow('443');
+    .reply(401, 'Unauthorized');
+  await expect(pageLoad('https://ru.hexlet.io/test401')).rejects.toThrow('401');
   // check if pageLoad result contains error code
 });
 
