@@ -13,6 +13,7 @@ const getFixturePath = (fileName) => join(__dirname, '..', '__fixtures__', fileN
 const readFixtureFileContent = (fileName) => readFile(getFixturePath(fileName), 'utf8');
 
 nock.disableNetConnect();
+const scope = nock('https://ru.hexlet.io').persist();
 
 // beforeEach
 
@@ -26,8 +27,6 @@ test('main test', async () => {
     './expected/ru-hexlet-io-courses_files/ru-hexlet-io-assets-professions-nodejs.png
     '),
   ]; */
-
-  const scope = nock(' https://ru.hexlet.io').persist();
   scope.get('/courses').reply(200, htmlToDownload);
   scope.get('/assets/professions/nodejs.png').reply(200, expectedPNG);
   const expected = [];
@@ -47,36 +46,28 @@ test('main test', async () => {
 });
 
 test('404 / page not found test', async () => {
-  /* const scope = nock(" https://testpage.testdomain")
-    .persist()
-    .get("/")
-    .reply(404, "Page not found"); */
-  await expect(pageLoad('https://testpage.testdomain')).rejects.toThrow();
+  scope.get('/test404')
+    .reply(404, 'Page not found');
+  await expect(pageLoad('https://ru.hexlet.io/test404')).rejects.toThrow('404');
 });
 
-test('401 / unauthorized test', async () => {
-  /* const scope = nock(' https://testpage.testdomain')
-    .persist()
-    .get('/')
-    .reply(401, 'Unauthorized'); */
-  await expect(pageLoad('https://testpage.testdomain')).rejects.toThrow();
+test('443 / unauthorized test', async () => {
+  scope.get('/test401')
+    .reply(443, 'Unauthorized');
+  await expect(pageLoad('https://ru.hexlet.io/test401')).rejects.toThrow('443');
   // check if pageLoad result contains error code
 });
 
 test('500 / internal server error test', async () => {
-  /* const scope = nock(' https://testpage.testdomain')
-    .persist()
-    .get('/')
-    .reply(500, 'Internal server error'); */
-  await expect(pageLoad('https://testpage.testdomain')).rejects.toThrow();
+  scope.get('/test500')
+    .reply(500, 'Unauthorized');
+  await expect(pageLoad('https://ru.hexlet.io/test500')).rejects.toThrow('500');
 });
 
 test('503 / service unavailable test', async () => {
-  /* const scope = nock(' https://testpage.testdomain')
-    .persist()
-    .get('/')
-    .reply(503, 'Service unavailable'); */
-  await expect(pageLoad('https://testpage.testdomain')).rejects.toThrow();
+  scope.get('/test503')
+    .reply(503, 'Unauthorized');
+  await expect(pageLoad('https://ru.hexlet.io/test503')).rejects.toThrow('503');
 });
 // move nock before all tests
 
