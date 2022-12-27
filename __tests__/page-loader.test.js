@@ -15,6 +15,31 @@ const readFixtureFileContent = (fileName) => readFile(getFixturePath(fileName), 
 nock.disableNetConnect();
 const scope = nock('https://ru.hexlet.io').persist();
 
+const codesToTest = [
+  404,
+  401,
+  505,
+  503,
+];
+
+const errorDescriptions = {
+  404: 'Page not found',
+  401: 'Unauthorized',
+  505: 'Internal server error',
+  503: 'Service unavailable',
+};
+
+describe('error codes tests', () => {
+  describe.each(codesToTest)('testing code %s', (code) => {
+    scope.get(`/test${code}`)
+      .reply(code, errorDescriptions[code]);
+    test('404 / page not found test', async () => {
+      scope.get(`/test${code}`)
+        .reply(404, 'Page not found');
+      await expect(pageLoad(`https://ru.hexlet.io/test${code}`)).rejects.toThrow(`${code}`);
+    });
+  });
+});
 // beforeEach
 
 test('main test', async () => {
@@ -44,32 +69,6 @@ test('main test', async () => {
   await expect(actualHTML).toEqual(expectedHTML);
   await expect(actualPNG).toEqual(expectedPNG);
 });
-
-test('404 / page not found test', async () => {
-  scope.get('/test404')
-    .reply(404, 'Page not found');
-  await expect(pageLoad('https://ru.hexlet.io/test404')).rejects.toThrow('404');
-});
-
-test('401 / unauthorized test', async () => {
-  scope.get('/test401')
-    .reply(401, 'Unauthorized');
-  await expect(pageLoad('https://ru.hexlet.io/test401')).rejects.toThrow('401');
-  // check if pageLoad result contains error code
-});
-
-test('500 / internal server error test', async () => {
-  scope.get('/test500')
-    .reply(500, 'Unauthorized');
-  await expect(pageLoad('https://ru.hexlet.io/test500')).rejects.toThrow('500');
-});
-
-test('503 / service unavailable test', async () => {
-  scope.get('/test503')
-    .reply(503, 'Unauthorized');
-  await expect(pageLoad('https://ru.hexlet.io/test503')).rejects.toThrow('503');
-});
-// move nock before all tests
 
 test('load page: file system errors', async () => {
   const pageUrl = 'http://localhost/';
