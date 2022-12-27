@@ -33,11 +33,11 @@ describe('error codes tests', () => {
   describe.each(codesToTest)('testing code %s', (code) => {
     scope.get(`/test${code}`)
       .reply(code, errorDescriptions[code]);
-    test('404 / page not found test', async () => {
+    it(`https://ru.hexlet.io/test${code}`, async () => {
       scope.get(`/test${code}`)
         .reply(404, 'Page not found');
       await expect(pageLoad(`https://ru.hexlet.io/test${code}`)).rejects.toThrow(`${code}`);
-    });
+    }, '');
   });
 });
 // beforeEach
