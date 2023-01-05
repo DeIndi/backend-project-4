@@ -1,9 +1,0 @@
-src = "https://www.google.com/img/banner.jpg"
-src = "folder/img/banner.jpg"
-src = "/img/banner.jpg"
-src = "./img/banner.jpg"
-src = "../img/banner.jpg"
-src = "//www.google.com/img/banner.jpg"
-
-
-page = "//www.google.com/index.html"
