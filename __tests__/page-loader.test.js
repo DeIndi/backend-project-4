@@ -15,19 +15,24 @@ const readFixtureFileContent = (fileName, encoding = 'utf-8') => readFile(getFix
 nock.disableNetConnect();
 const scope = nock('https://ru.hexlet.io').persist();
 
-const codesToTest = [
-  404,
-  401,
-  505,
-  503,
+const serverErrors = [
+  {
+    code: 404,
+    desciption: 'Page not found',
+  },
+  {
+    code: 401,
+    desciption: 'Unauthorized',
+  },
+  {
+    code: 505,
+    desciption: 'Internal server error',
+  },
+  {
+    code: 503,
+    desciption: 'Service unavailable',
+  },
 ];
-
-const errorDescriptions = {
-  404: 'Page not found',
-  401: 'Unauthorized',
-  505: 'Internal server error',
-  503: 'Service unavailable',
-};
 
 let outputDir = null;
 
@@ -57,12 +62,12 @@ beforeAll(async () => {
 
 describe('Page loader', () => {
   describe('error codes tests', () => {
-    test.each(codesToTest)('testing code %s', async (code) => {
-      scope.get(`/test${code}`)
-        .reply(code, errorDescriptions[code]);
-      scope.get(`/test${code}`)
-        .reply(code, errorDescriptions[code]);
-      await expect(pageLoad(`https://ru.hexlet.io/test${code}`)).rejects.toThrow(`${code}`);
+    test.each(serverErrors)('testing code %s', async (error) => {
+      scope.get(`/test${error.code}`)
+        .reply(error.code, error.desciption);
+      scope.get(`/test${error.code}`)
+        .reply(error.code, error.desciption);
+      await expect(pageLoad(`https://ru.hexlet.io/test${error.code}`)).rejects.toThrow(`${error.code}`);
     });
   });
 
@@ -78,30 +83,17 @@ describe('Page loader', () => {
       scope.get(asset.urlPath).reply(200, expectedFiles[asset.urlPath]);
     }));
     scope.get('/courses').reply(200, htmlToDownload);
-    // scope.get('/assets/professions/nodejs.png').reply(200, expectedPNG);
-
     await pageLoad('https://ru.hexlet.io/courses', outputDir);
     const actualHTML = await readFile(`${outputDir}/ru-hexlet-io-courses.html`, 'utf-8');
     const actualFiles = {};
     await Promise.all(assets.map(async (asset) => {
       actualFiles[asset.urlPath] = await readFile(`${outputDir}/${asset.outputPath}`, asset.encoding);
-      // const file = await readFixtureFileContent(`${fileName}`);
     }));
-    /* await readdir((`${outputDir}/ru-hexlet-io-courses_files`), (err, filenames) => {
-      filenames.forEach(async (filename) => {
-        const file = await readFile(`${outputDir}/${filename}`, 'utf-8');
-        actualFiles[filename] = file;
-        console.log('path to file: ', `/assets/professions/${filename}`);
-        // await expect(actualFiles[filename]).toEqual(expectedFiles[filename]);
-      });
-    }); */
-    // console.log('Expected Files: ', expectedFiles);
     const expectedFileNames = Object.keys(expectedFiles);
     await Promise.all(expectedFileNames.map(async (fileName) => {
       await expect(actualFiles[fileName]).toEqual(expectedFiles[fileName]);
     }));
     await expect(actualHTML).toEqual(expectedHTML);
-    // await expect(actualPNG).toEqual(expectedPNG);
   });
 
   it('load page: file system errors', async () => {
