@@ -12,7 +12,6 @@ cli.option('-o, --output <dir>', 'output directory');
 cli.arguments('<url>');
 cli.action((link, options) => {
   pageLoad(link, options.output).then(() => {
-    console.log('Page loaded!');
   }).catch((error) => {
     console.error('Error messge:', error.message);
     process.exit(1);

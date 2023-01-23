@@ -122,7 +122,8 @@ describe('Page loader', () => {
       await expect(actualHTML).toEqual(expectedHTML);
     });
 
-    it.skip('successful page download', async () => {
+    it('successful page download', async () => {
+      const curDir = process.cwd();
       process.chdir(outputDir);
       await pageLoad(`${pageUrl}/courses`);
       const actualHTML = await readFile(`${outputDir}/ru-hexlet-io-courses.html`, 'utf-8');
@@ -134,6 +135,7 @@ describe('Page loader', () => {
       // eslint-disable-next-line max-len
       expectedFileNames.forEach((fileName) => expect(actualFiles[fileName]).toEqual(expectedFiles[fileName]));
       await expect(actualHTML).toEqual(expectedHTML);
+      process.chdir(curDir);
     });
   });
 });
