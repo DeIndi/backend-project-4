@@ -108,7 +108,7 @@ describe('Page loader', () => {
     beforeEach(async () => {
       outputDir = await mkdtemp(`${os.tmpdir()}/page-loader-test`);
     });
-    it('successful page download', async () => {
+    it('successful page download with output option', async () => {
       await pageLoad(`${pageUrl}/courses`, outputDir);
       const actualHTML = await readFile(`${outputDir}/ru-hexlet-io-courses.html`, 'utf-8');
       const actualFiles = {};
@@ -122,8 +122,7 @@ describe('Page loader', () => {
       await expect(actualHTML).toEqual(expectedHTML);
     });
 
-    it('successful page download (with output option)', async () => {
-      // cd outputDir
+    it('successful page download', async () => {
       process.chdir(outputDir);
       await pageLoad(`${pageUrl}/courses`);
       const actualHTML = await readFile(`${outputDir}/ru-hexlet-io-courses.html`, 'utf-8');
