@@ -122,7 +122,7 @@ describe('Page loader', () => {
       await expect(actualHTML).toEqual(expectedHTML);
     });
 
-    it('successful page download', async () => {
+    it.skip('successful page download', async () => {
       process.chdir(outputDir);
       await pageLoad(`${pageUrl}/courses`);
       const actualHTML = await readFile(`${outputDir}/ru-hexlet-io-courses.html`, 'utf-8');

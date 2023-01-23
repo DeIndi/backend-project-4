@@ -15,7 +15,6 @@ const slugify = (address) => (
 );
 
 const urlToFileName = (hostAndPath, defaultExt = '.html') => {
-  console.log('hostAndPath: ', hostAndPath);
   const { dir, name, ext } = parse(hostAndPath.replace(/\/$/, defaultExt));
   const slug = slugify(`${dir}/${name}`);
   return `${slug}${ext || defaultExt}`;
@@ -66,7 +65,6 @@ const parseHTML = (filesDirPath, htmlText, baseUrl) => {
     });
   });
   const htmlParsed = $.html();
-  console.log('assets from ParseHTML: ', assets);
   return { assets, htmlParsed };
 };
 
@@ -79,7 +77,6 @@ const downloadAsset = ({ filePath, assetUrl }, filesDirPath) => axios.get(`${ass
 });
 
 const downloadResources = (assets, filesDirPath) => {
-  console.log('assets: ', assets);
   const tasks = assets.map(({ filePath, assetUrl }) => ({
     title: assetUrl,
     task: () => downloadAsset({ filePath, assetUrl }, filesDirPath),
@@ -93,14 +90,7 @@ const pageLoad = (url, dir = '.') => {
   let htmlPath = '';
   let htmlText = '';
   const filesDirPath = urlToDirName(url);
-  console.log('filesDirPath: ', filesDirPath);
   const fullPath = `${dir}/${filesDirPath}`;
-  // check if dir is accessible to write
-
-  // console.log('constants W_OK: ', constants.W_OK);
-  // throw 'No write access to dir!';
-  // console.log('No write access to dir!');
-  // }
   return axios.get(url)
     .then((resp) => {
       const tempLink = new URL(url);
@@ -116,10 +106,7 @@ const pageLoad = (url, dir = '.') => {
       return downloadResources(assets, fullPath);
       // with dir
     })
-    .then(() => {
-      console.log('html file path ', `${dir}/${htmlPath}`);
-      return writeFile(`${dir}/${htmlPath}`, htmlText);
-    });
+    .then(() => writeFile(`${dir}/${htmlPath}`, htmlText));
 };
 
 export default pageLoad;
