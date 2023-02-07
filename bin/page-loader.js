@@ -7,7 +7,7 @@ cli
   .description('Loads a certain html page, using axios.')
   .helpOption(true)
   .version('1.001')
-  .option('-o, --output <dir>', 'output directory')
+  .option('-o, --output <dir>', 'output directory', process.cwd())
   .arguments('<url>')
   .action((link, options) => {
     pageLoad(link, options.output).then(() => {

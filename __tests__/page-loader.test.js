@@ -113,7 +113,7 @@ describe('Page loader', () => {
     afterEach(async () => {
       process.chdir(currentDir);
     });
-    const pageDownloadTest = async () => {
+    const expectPageDownloaded = async () => {
       const actualHTML = await readFile(`${outputDir}/ru-hexlet-io-courses.html`, 'utf-8');
       const actualFiles = {};
       await Promise.all(assets.map(async (asset) => {
@@ -126,12 +126,13 @@ describe('Page loader', () => {
     };
     it('successful page download with output option', async () => {
       await pageLoad(`${coursesUrl}`, outputDir);
-      await pageDownloadTest();
+      await expectPageDownloaded();
     });
     it('successful page download', async () => {
       process.chdir(outputDir);
       await pageLoad(`${coursesUrl}`);
-      await pageDownloadTest();
+      await expectPageDownloaded();
     });
+    //fix linter for expect assertion
   });
 });
