@@ -133,6 +133,6 @@ describe('Page loader', () => {
       await pageLoad(`${coursesUrl}`);
       await expectPageDownloaded();
     });
-    //fix linter for expect assertion
+    // fix linter for expect assertion
   });
 });
