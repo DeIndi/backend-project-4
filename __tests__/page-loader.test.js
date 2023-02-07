@@ -12,6 +12,7 @@ const __dirname = dirname(__filename);
 const getFixturePath = (fileName) => join(__dirname, '..', '__fixtures__', fileName);
 
 const pageUrl = 'https://ru.hexlet.io';
+const coursesUrl = 'https://ru.hexlet.io/courses';
 
 const readFixtureFileContent = (fileName, encoding = 'utf-8') => readFile(getFixturePath(fileName), encoding);
 
@@ -93,13 +94,13 @@ describe('Page loader', () => {
     it('Directory not exists', async () => {
       const rootDirPath = '/notExisting';
       await expect(
-        pageLoad(`${pageUrl}/courses`, rootDirPath),
+        pageLoad(`${coursesUrl}`, rootDirPath),
       ).rejects.toThrow('EACCES: permission denied');
     });
     it('Directory not available', async () => {
       const rootDirPath = '/sys';
       await expect(
-        pageLoad(`${pageUrl}/courses`, rootDirPath),
+        pageLoad(`${coursesUrl}`, rootDirPath),
       ).rejects.toThrow('EACCES: permission denied');
     });
   });
@@ -112,31 +113,25 @@ describe('Page loader', () => {
     afterEach(async () => {
       process.chdir(currentDir);
     });
-    it('successful page download with output option', async () => {
-      await pageLoad(`${pageUrl}/courses`, outputDir);
+    const pageDownloadTest = async () => {
       const actualHTML = await readFile(`${outputDir}/ru-hexlet-io-courses.html`, 'utf-8');
       const actualFiles = {};
       await Promise.all(assets.map(async (asset) => {
         actualFiles[asset.urlPath] = await readFile(`${outputDir}/${asset.outputPath}`, asset.encoding);
       }));
       const expectedFileNames = Object.keys(expectedFiles);
-      await Promise.all(expectedFileNames.map(async (fileName) => {
-        await expect(actualFiles[fileName]).toEqual(expectedFiles[fileName]);
-      }));
-      await expect(actualHTML).toEqual(expectedHTML);
+      expectedFileNames.forEach((fileName) => expect(actualFiles[fileName])
+        .toEqual(expectedFiles[fileName]));
+      expect(actualHTML).toEqual(expectedHTML);
+    };
+    it('successful page download with output option', async () => {
+      await pageLoad(`${coursesUrl}`, outputDir);
+      await pageDownloadTest();
     });
     it('successful page download', async () => {
       process.chdir(outputDir);
-      await pageLoad(`${pageUrl}/courses`);
-      const actualHTML = await readFile(`${outputDir}/ru-hexlet-io-courses.html`, 'utf-8');
-      const actualFiles = {};
-      await Promise.all(assets.map(async (asset) => {
-        actualFiles[asset.urlPath] = await readFile(`${outputDir}/${asset.outputPath}`, asset.encoding);
-      }));
-      const expectedFileNames = Object.keys(expectedFiles);
-      // eslint-disable-next-line max-len
-      expectedFileNames.forEach((fileName) => expect(actualFiles[fileName]).toEqual(expectedFiles[fileName]));
-      await expect(actualHTML).toEqual(expectedHTML);
+      await pageLoad(`${coursesUrl}`);
+      await pageDownloadTest();
     });
   });
 });
