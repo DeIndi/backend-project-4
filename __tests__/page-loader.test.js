@@ -11,13 +11,12 @@ const __dirname = dirname(__filename);
 
 const getFixturePath = (fileName) => join(__dirname, '..', '__fixtures__', fileName);
 
-const pageUrl = new URL('https://ru.hexlet.io');
-const coursesUrl = `${pageUrl.origin}/courses`;
+const coursesUrl = new URL('https://ru.hexlet.io/courses');
 
 const readFixtureFileContent = (fileName, encoding = 'utf-8') => readFile(getFixturePath(fileName), encoding);
 
 nock.disableNetConnect();
-const scope = nock(pageUrl.origin).persist();
+const scope = nock(coursesUrl.origin).persist();
 
 const serverErrors = [
   {
@@ -83,24 +82,24 @@ describe('Page loader', () => {
     test.each(serverErrors)('testing code %s', async (error) => {
       scope.get(`/test${error.code}`)
         .reply(error.code, error.desciption);
-      await expect(pageLoad(`${pageUrl.origin}/test${error.code}`)).rejects.toThrow(`${error.code}`);
+      await expect(pageLoad(`${coursesUrl.origin}/test${error.code}`)).rejects.toThrow(`${error.code}`);
     });
     it('file system error', async () => {
       const rootDirPath = '/sys';
       await expect(
-        pageLoad(pageUrl.origin, rootDirPath),
+        pageLoad(coursesUrl.origin, rootDirPath),
       ).rejects.toThrow();
     });
     it('Directory not exists', async () => {
       const rootDirPath = '/notExisting';
       await expect(
-        pageLoad(`${coursesUrl}`, rootDirPath),
+        pageLoad(`${coursesUrl.href}`, rootDirPath),
       ).rejects.toThrow('EACCES: permission denied');
     });
     it('Directory not available', async () => {
       const rootDirPath = '/sys';
       await expect(
-        pageLoad(`${coursesUrl}`, rootDirPath),
+        pageLoad(`${coursesUrl.href}`, rootDirPath),
       ).rejects.toThrow('EACCES: permission denied');
     });
   });
@@ -125,12 +124,12 @@ describe('Page loader', () => {
       expect(actualHTML).toEqual(expectedHTML);
     };
     it('successful page download with output option', async () => {
-      await pageLoad(`${coursesUrl}`, outputDir);
+      await pageLoad(`${coursesUrl.href}`, outputDir);
       await expectPageDownloaded();
     });
     it('successful page download', async () => {
       process.chdir(outputDir);
-      await pageLoad(`${coursesUrl}`);
+      await pageLoad(`${coursesUrl.href}`);
       await expectPageDownloaded();
     });
     // fix linter for expect assertion
