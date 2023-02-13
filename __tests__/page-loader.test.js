@@ -11,13 +11,13 @@ const __dirname = dirname(__filename);
 
 const getFixturePath = (fileName) => join(__dirname, '..', '__fixtures__', fileName);
 
-const pageUrl = 'https://ru.hexlet.io';
-const coursesUrl = 'https://ru.hexlet.io/courses';
+const pageUrl = new URL('https://ru.hexlet.io');
+const coursesUrl = `${pageUrl.origin}/courses`;
 
 const readFixtureFileContent = (fileName, encoding = 'utf-8') => readFile(getFixturePath(fileName), encoding);
 
 nock.disableNetConnect();
-const scope = nock(pageUrl).persist();
+const scope = nock(pageUrl.origin).persist();
 
 const serverErrors = [
   {
@@ -83,12 +83,12 @@ describe('Page loader', () => {
     test.each(serverErrors)('testing code %s', async (error) => {
       scope.get(`/test${error.code}`)
         .reply(error.code, error.desciption);
-      await expect(pageLoad(`${pageUrl}/test${error.code}`)).rejects.toThrow(`${error.code}`);
+      await expect(pageLoad(`${pageUrl.origin}/test${error.code}`)).rejects.toThrow(`${error.code}`);
     });
     it('file system error', async () => {
       const rootDirPath = '/sys';
       await expect(
-        pageLoad(pageUrl.toString(), rootDirPath),
+        pageLoad(pageUrl.origin, rootDirPath),
       ).rejects.toThrow();
     });
     it('Directory not exists', async () => {
