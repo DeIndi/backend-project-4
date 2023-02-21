@@ -12,6 +12,7 @@ const __dirname = dirname(__filename);
 const getFixturePath = (fileName) => join(__dirname, '..', '__fixtures__', fileName);
 
 const coursesUrl = new URL('https://ru.hexlet.io/courses');
+const htmlFileName = 'ru-hexlet-io-courses.html';
 
 const readFixtureFileContent = (fileName, encoding = 'utf-8') => readFile(getFixturePath(fileName), encoding);
 
@@ -59,13 +60,15 @@ const assets = [
     encoding: 'utf-8',
   },
 ];
+const getAssets = () => {
 
+}
 describe('Page loader', () => {
   let expectedHTML;
   const expectedFiles = {};
   beforeAll(async () => {
-    expectedHTML = await readFixtureFileContent('./expected/ru-hexlet-io-courses.html');
-    const htmlToDownload = await readFixtureFileContent('./ru-hexlet-io-courses.html');
+    expectedHTML = await readFixtureFileContent(`./expected/${htmlFileName}`);
+    const htmlToDownload = await readFixtureFileContent(`./${htmlFileName}`);
     await Promise.all(assets.map(async (asset) => {
       expectedFiles[asset.urlPath] = await readFixtureFileContent(
         asset.fixturePath,

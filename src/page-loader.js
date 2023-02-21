@@ -43,27 +43,16 @@ const parseHTML = (filesDirPath, htmlText, baseUrl) => {
   const $ = load(htmlText);
   const assets = [];
   tagsAttrsPairs.forEach(([tagName, attrName]) => {
-    $(`${tagName}`).each((idx, elem) => {
-      // Это href <link href="http://yandex.ru/some.html" />
-      // elemHref -- это строка "http://yandex.ru/some.html"
-      const elemHref = $(elem).attr(`${attrName}`);
-      if (!elemHref) {
-        return;
-      }
-      // url -- это URL страницы на которой asset
-      if (new URL(elemHref, baseUrl).origin !== new URL(baseUrl).origin) {
-        return;
-      }
-      // assetPath -- адрес файла в файловой системе
-      const assetPath = assetSrcToAssetPath(elemHref, baseUrl);
-      // filePath -- тоже (тот же) адрес в файловой системе, из которого вычистили двойные слэши
-      const filePath = `${filesDirPath}/${assetPath}`.replace('//', '/');
-      $(elem).attr(`${attrName}`, filePath);
-      // filepath - in file system
-      // assetUrl - url
-      assets.push({ filePath, assetUrl: new URL(elemHref, baseUrl).toString() });
+    $(`${tagName}`).toArray().map((elem) => $(elem))
+        .filter(($elem) => $elem.attr(attrName))
+        .map(($elem) => ({$elem, url: new URL($elem.attr(attrName), baseUrl)}))
+        .filter(({$elem, url}) => url.origin === baseUrl)
+        .forEach(({$elem, url}) => {
+          const assetPath = assetSrcToAssetPath($elem.attr(attrName), baseUrl);
+          const filePath = `${filesDirPath}/${assetPath}`.replace('//', '/');
+          assets.push({filePath, assetUrl: url.toString()});
+        })
     });
-  });
   const htmlParsed = $.html();
   return { assets, htmlParsed };
 };
