@@ -60,22 +60,22 @@ const assets = [
     encoding: 'utf-8',
   },
 ];
-const getAssets = () => {
 
-}
 describe('Page loader', () => {
   let expectedHTML;
   const expectedFiles = {};
   beforeAll(async () => {
     expectedHTML = await readFixtureFileContent(`./expected/${htmlFileName}`);
     const htmlToDownload = await readFixtureFileContent(`./${htmlFileName}`);
-    await Promise.all(assets.map(async (asset) => {
-      expectedFiles[asset.urlPath] = await readFixtureFileContent(
+    const result = Promise.all(assets.map(async (asset) => {
+      (expectedFiles[asset.urlPath] = await readFixtureFileContent(
         asset.fixturePath,
         asset.encoding,
-      );
-      scope.get(asset.urlPath).reply(200, expectedFiles[asset.urlPath]);
+      ));
     }));
+    result.then(() => {
+      assets.forEach((asset) => scope.get(asset.urlPath).reply(200, expectedFiles[asset.urlPath]));
+    });
     scope.get('/courses').reply(200, htmlToDownload);
   });
   describe('negative tests', () => {

@@ -5,6 +5,7 @@ import axios from 'axios';
 import { load } from 'cheerio';
 import { parse } from 'node:path';
 import _ from 'lodash';
+import path from 'path';
 import Listr from 'listr';
 
 const slugify = (address) => (
@@ -40,19 +41,22 @@ const assetTags = { img: 'src', link: 'href', script: 'src' };
 const tagsAttrsPairs = _.toPairs(assetTags);
 
 const parseHTML = (filesDirPath, htmlText, baseUrl) => {
+  const { origin } = new URL(baseUrl);
   const $ = load(htmlText);
   const assets = [];
   tagsAttrsPairs.forEach(([tagName, attrName]) => {
-    $(`${tagName}`).toArray().map((elem) => $(elem))
-        .filter(($elem) => $elem.attr(attrName))
-        .map(($elem) => ({$elem, url: new URL($elem.attr(attrName), baseUrl)}))
-        .filter(({$elem, url}) => url.origin === baseUrl)
-        .forEach(({$elem, url}) => {
-          const assetPath = assetSrcToAssetPath($elem.attr(attrName), baseUrl);
-          const filePath = `${filesDirPath}/${assetPath}`.replace('//', '/');
-          assets.push({filePath, assetUrl: url.toString()});
-        })
-    });
+    $(`${tagName}`).toArray()
+      .map((elem) => $(elem))
+      .filter(($elem) => $elem.attr(attrName))
+      .map(($elem) => ({ $elem, url: new URL($elem.attr(attrName), baseUrl) }))
+      .filter(({ url }) => url.origin === origin)
+      .forEach(({ $elem, url }) => {
+        const assetPath = assetSrcToAssetPath($elem.attr(attrName), baseUrl);
+        const filePath = path.join(`${filesDirPath}/${assetPath}`);
+        $elem.attr(`${attrName}`, filePath);
+        assets.push({ filePath, assetUrl: url.toString() });
+      });
+  });
   const htmlParsed = $.html();
   return { assets, htmlParsed };
 };
@@ -60,8 +64,7 @@ const parseHTML = (filesDirPath, htmlText, baseUrl) => {
 const downloadAsset = ({ filePath, assetUrl }, filesDirPath) => axios.get(`${assetUrl.toString()}`, {
   responseType: 'arraybuffer',
 }).then((result) => {
-  const fileChunks = filePath.split('/');
-  const fileName = fileChunks[fileChunks.length - 1];
+  const fileName = path.basename(filePath);
   return writeFile(`${filesDirPath}/${fileName}`, result.data);
 });
 
