@@ -63,18 +63,15 @@ const assets = [
 
 describe('Page loader', () => {
   let expectedHTML;
-  const expectedFiles = {};
+  let expectedFiles = {};
   beforeAll(async () => {
     expectedHTML = await readFixtureFileContent(`./expected/${htmlFileName}`);
     const htmlToDownload = await readFixtureFileContent(`./${htmlFileName}`);
-    const result = Promise.all(assets.map(async (asset) => {
-      (expectedFiles[asset.urlPath] = await readFixtureFileContent(
-        asset.fixturePath,
-        asset.encoding,
-      ));
-    }));
-    result.then(() => {
-      assets.forEach((asset) => scope.get(asset.urlPath).reply(200, expectedFiles[asset.urlPath]));
+    const expectedFilePairs = await Promise.all(assets.map(async (asset) => [asset.urlPath,
+      await readFixtureFileContent(asset.fixturePath, asset.encoding)]));
+    expectedFiles = Object.fromEntries(expectedFilePairs);
+    assets.forEach((asset) => {
+      scope.get(asset.urlPath).reply(200, expectedFiles[asset.urlPath]);
     });
     scope.get('/courses').reply(200, htmlToDownload);
   });
@@ -117,10 +114,9 @@ describe('Page loader', () => {
     });
     const expectPageDownloaded = async () => {
       const actualHTML = await readFile(`${outputDir}/ru-hexlet-io-courses.html`, 'utf-8');
-      const actualFiles = {};
-      await Promise.all(assets.map(async (asset) => {
-        actualFiles[asset.urlPath] = await readFile(`${outputDir}/${asset.outputPath}`, asset.encoding);
-      }));
+      let actualFiles = {};
+      const actualFilePairs = await Promise.all(assets.map(async (asset) => [asset.urlPath, await readFile(`${outputDir}/${asset.outputPath}`, asset.encoding)]));
+      actualFiles = Object.fromEntries(actualFilePairs);
       const expectedFileNames = Object.keys(expectedFiles);
       expectedFileNames.forEach((fileName) => expect(actualFiles[fileName])
         .toEqual(expectedFiles[fileName]));
